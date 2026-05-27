@@ -119,12 +119,6 @@ function startEdit(it){
   editId=it.id; setView("add");
 }
 function saveItem(){
-  if(!form.name.trim()) return;
-  if(editId){ items=items.map(it=>it.id===editId?{...form,id:editId}:it); showToast("Actualizado ✓"); }
-  else { items.push({...form,id:Date.now().toString()}); showToast("Agregado ✓"); }
-  form={name:"",dose:"",time:"Mañana",icon:"💊",note:"",days:[0,1,2,3,4,5,6]};
-  editId=null; save(); setView("today");
-}
 function toggleDay(d){
   if(form.days.includes(d)) form.days=form.days.filter(x=>x!==d);
   else form.days.push(d);
