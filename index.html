@@ -1,86 +1,263 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
   <title>Mi Rutina 💊</title>
-
-  <!-- PWA Meta Tags -->
-  <meta name="theme-color" content="#6366f1" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-  <meta name="apple-mobile-web-app-title" content="Mi Rutina" />
-  <link rel="apple-touch-icon" href="https://fav.farm/💊" />
-
-  <!-- PWA Manifest inline -->
-  <script>
-    const manifest = {
-      name: "Mi Rutina - Tracker de Suplementos",
-      short_name: "Mi Rutina",
-      description: "Tracker de suplementos y medicación",
-      start_url: "/",
-      display: "standalone",
-      background_color: "#f8f9fa",
-      theme_color: "#6366f1",
-      icons: [{ src: "https://fav.farm/💊", sizes: "192x192", type: "image/png" }]
-    };
-    const blob = new Blob([JSON.stringify(manifest)], { type: "application/json" });
-    const link = document.createElement("link");
-    link.rel = "manifest";
-    link.href = URL.createObjectURL(blob);
-    document.currentScript.after(link);
-  </script>
-
-  <!-- React + Babel -->
-  <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
-  <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
-
+  <meta name="theme-color" content="#6366f1"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+  <meta name="apple-mobile-web-app-title" content="Mi Rutina"/>
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { background: #f8f9fa; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
-    input:focus { border-color: #6366f1 !important; box-shadow: 0 0 0 3px rgba(99,102,241,.1); }
-    ::-webkit-scrollbar { width: 4px; }
-    ::-webkit-scrollbar-thumb { background: #ddd; border-radius: 99px; }
+    *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+    body{background:#f8f9fa;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;max-width:480px;margin:0 auto;min-height:100vh}
+    button{cursor:pointer;font-family:inherit}
+    input{font-family:inherit;outline:none}
+    input:focus{border-color:#6366f1!important;box-shadow:0 0 0 3px rgba(99,102,241,.15)}
+    .header{background:#fff;border-bottom:1px solid #eee;padding:20px 20px 12px;position:sticky;top:0;z-index:10}
+    .header-top{display:flex;justify-content:space-between;align-items:center}
+    .streak-box{text-align:center;background:#f0fdf4;border-radius:12px;padding:8px 14px}
+    .streak-num{font-size:22px;font-weight:800;color:#16a34a}
+    .streak-label{font-size:10px;color:#16a34a;font-weight:600}
+    .progress-bar-bg{background:#e5e7eb;border-radius:99px;height:6px;margin-top:4px}
+    .progress-bar-fill{height:6px;border-radius:99px;transition:width .4s}
+    .nav{display:flex;gap:6px;margin-top:12px}
+    .nav button{flex:1;padding:7px 0;border-radius:8px;border:none;font-size:13px;font-weight:600;transition:all .2s}
+    .nav button.active{background:#6366f1;color:#fff}
+    .nav button:not(.active){background:transparent;color:#666}
+    .content{padding:16px 16px 100px}
+    .card{background:#fff;border-radius:14px;padding:14px 16px;margin-bottom:10px;display:flex;align-items:center;gap:14px;border:2px solid transparent;box-shadow:0 1px 4px rgba(0,0,0,.06);cursor:pointer;transition:border-color .2s}
+    .card.done{border-color:#bbf7d0}
+    .card-icon{width:44px;height:44px;border-radius:12px;background:#f3f4f6;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+    .card.done .card-icon{background:#f0fdf4}
+    .card-name{font-weight:600;font-size:15px;color:#1a1a2e}
+    .card.done .card-name{color:#16a34a;text-decoration:line-through}
+    .card-sub{font-size:12px;color:#999;margin-top:2px}
+    .card-note{font-size:11px;color:#bbb;margin-top:2px}
+    .check{width:26px;height:26px;border-radius:99px;border:2px solid #d1d5db;background:transparent;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .2s}
+    .check.done{border:none;background:#16a34a}
+    .empty{text-align:center;padding:60px 20px;color:#bbb}
+    .empty-icon{font-size:48px}
+    .btn-primary{background:#6366f1;color:#fff;border:none;border-radius:10px;padding:10px 24px;font-weight:600;font-size:14px}
+    .section-title{font-size:14px;font-weight:600;color:#666;margin-bottom:12px}
+    .bars{display:flex;gap:8px;margin-bottom:24px}
+    .bar-wrap{flex:1;text-align:center}
+    .bar-bg{height:60px;background:#f3f4f6;border-radius:8px;display:flex;align-items:flex-end;overflow:hidden}
+    .bar-fill{width:100%;border-radius:8px;transition:height .4s}
+    .bar-label{font-size:11px;color:#999;margin-top:4px}
+    .bar-count{font-size:11px;font-weight:600;color:#555}
+    .list-card{background:#fff;border-radius:14px;padding:12px 14px;margin-bottom:8px;display:flex;align-items:center;gap:12px;box-shadow:0 1px 4px rgba(0,0,0,.05)}
+    .btn-icon{border:none;border-radius:8px;padding:6px 10px;font-size:15px}
+    .form-label{font-size:12px;font-weight:600;color:#666;display:block;margin-bottom:6px}
+    .icon-grid{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
+    .icon-btn{width:40px;height:40px;border-radius:10px;border:2px solid transparent;font-size:20px;background:#f3f4f6}
+    .icon-btn.selected{border-color:#6366f1;background:#eef2ff}
+    .form-input{width:100%;padding:11px 14px;border-radius:10px;border:1px solid #e5e7eb;font-size:14px;margin-bottom:12px;background:#fff}
+    .time-grid{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
+    .time-btn{padding:7px 12px;border-radius:8px;border:none;font-size:12px;font-weight:600}
+    .time-btn.selected{background:#6366f1;color:#fff}
+    .time-btn:not(.selected){background:#f3f4f6;color:#555}
+    .day-grid{display:flex;gap:6px;margin-bottom:14px}
+    .day-btn{flex:1;padding:8px 0;border-radius:8px;border:none;font-size:12px;font-weight:700}
+    .day-btn.selected{background:#6366f1;color:#fff}
+    .day-btn:not(.selected){background:#f3f4f6;color:#999}
+    .btn-save{width:100%;padding:14px;border-radius:12px;border:none;color:#fff;font-size:15px;font-weight:700;margin-top:4px}
+    .btn-cancel{width:100%;padding:12px;border-radius:12px;border:none;background:transparent;color:#999;font-size:14px;margin-top:8px}
+    .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1a1a2e;color:#fff;padding:10px 20px;border-radius:10px;font-size:14px;font-weight:600;z-index:99;white-space:nowrap;opacity:0;transition:opacity .3s;pointer-events:none}
+    .toast.show{opacity:1}
   </style>
 </head>
 <body>
-  <div id="root"></div>
+<div id="app"></div>
 
-  <script type="text/babel">
-    const { useState, useEffect } = React;
+<script>
+const ICONS = ["💊","🧴","💉","🌿","🫧","⚗️","🔬","🩺"];
+const TIMES = ["Mañana","Mediodía","Tarde","Noche","Con comida","En ayunas"];
+const DAYS  = ["D","L","M","M","J","V","S"];
 
-    const ICONS = ["💊","🧴","💉","🌿","🫧","⚗️","🔬","🩺"];
-    const TIMES = ["Mañana","Mediodía","Tarde","Noche","Con comida","En ayunas"];
-    const DAY_NAMES = ["D","L","M","M","J","V","S"];
+let items = [], log = {}, view = "today", editId = null;
+let form = { name:"", dose:"", time:"Mañana", icon:"💊", note:"", days:[0,1,2,3,4,5,6] };
 
-    const todayStr = () => new Date().toISOString().split("T")[0];
+function load() {
+  try { items = JSON.parse(localStorage.getItem("supp_items")||"[]"); } catch{ items=[]; }
+  try { log   = JSON.parse(localStorage.getItem("supp_log")||"{}");   } catch{ log={}; }
+}
+function save() {
+  localStorage.setItem("supp_items", JSON.stringify(items));
+  localStorage.setItem("supp_log",   JSON.stringify(log));
+}
+function todayStr() { return new Date().toISOString().split("T")[0]; }
+function todayItems() { return items.filter(it => it.days.includes(new Date().getDay())); }
+function calcStreak() {
+  let s=0, d=new Date();
+  for(let i=0;i<30;i++){
+    const k=d.toISOString().split("T")[0];
+    const di=items.filter(it=>it.days.includes(d.getDay()));
+    if(!di.length){d.setDate(d.getDate()-1);continue;}
+    if(di.every(it=>log[k]?.[it.id])){s++;d.setDate(d.getDate()-1);}else break;
+  }
+  return s;
+}
+function showToast(msg){
+  const t=document.getElementById("toast");
+  t.textContent=msg; t.classList.add("show");
+  setTimeout(()=>t.classList.remove("show"),2000);
+}
+function setView(v){ view=v; render(); }
+function toggle(id){
+  const k=todayStr();
+  if(!log[k]) log[k]={};
+  log[k][id]=!log[k][id];
+  save(); render();
+}
+function deleteItem(id){
+  items=items.filter(it=>it.id!==id);
+  save(); showToast("Eliminado"); render();
+}
+function startEdit(it){
+  form={name:it.name,dose:it.dose,time:it.time,icon:it.icon,note:it.note||"",days:[...it.days]};
+  editId=it.id; setView("add");
+}
+function saveItem(){
+  if(!form.name.trim()) return;
+  if(editId){ items=items.map(it=>it.id===editId?{...form,id:editId}:it); showToast("Actualizado ✓"); }
+  else { items.push({...form,id:Date.now().toString()}); showToast("Agregado ✓"); }
+  form={name:"",dose:"",time:"Mañana",icon:"💊",note:"",days:[0,1,2,3,4,5,6]};
+  editId=null; save(); setView("today");
+}
+function toggleDay(d){
+  if(form.days.includes(d)) form.days=form.days.filter(x=>x!==d);
+  else form.days.push(d);
+  render();
+}
+function formSet(k,v){ form[k]=v; render(); }
 
-    function calcStreak(log, items) {
-      let s = 0, d = new Date();
-      for (let i = 0; i < 30; i++) {
-        const k = d.toISOString().split("T")[0];
-        const dayItems = items.filter(it => it.days.includes(d.getDay()));
-        if (!dayItems.length) { d.setDate(d.getDate() - 1); continue; }
-        const done = dayItems.every(it => log[k]?.[it.id]);
-        if (done) { s++; d.setDate(d.getDate() - 1); } else break;
-      }
-      return s;
-    }
+function renderToday(){
+  const ti=todayItems(), k=todayStr(), tl=log[k]||{};
+  if(!ti.length) return `
+    <div class="empty">
+      <div class="empty-icon">🌿</div>
+      <p style="font-size:15px;margin-top:12px">No hay items para hoy</p>
+      <button class="btn-primary" style="margin-top:12px" onclick="setView('add')">+ Agregar</button>
+    </div>`;
+  return ti.sort((a,b)=>TIMES.indexOf(a.time)-TIMES.indexOf(b.time)).map(it=>{
+    const done=!!tl[it.id];
+    return `
+    <div class="card ${done?'done':''}" onclick="toggle('${it.id}')">
+      <div class="card-icon">${it.icon}</div>
+      <div style="flex:1">
+        <div class="card-name">${it.name}</div>
+        <div class="card-sub">${it.dose?it.dose+' · ':''}${it.time}</div>
+        ${it.note?`<div class="card-note">${it.note}</div>`:''}
+      </div>
+      <div class="check ${done?'done':''}">${done?'<span style="color:#fff;font-size:14px">✓</span>':''}</div>
+    </div>`;
+  }).join('');
+}
 
-    function App() {
-      const [items, setItems] = useState(() => {
-        try { return JSON.parse(localStorage.getItem("supp_items") || "[]"); } catch { return []; }
-      });
-      const [log, setLog] = useState(() => {
-        try { return JSON.parse(localStorage.getItem("supp_log") || "{}"); } catch { return {}; }
-      });
-      const [view, setView] = useState("today");
-      const [form, setForm] = useState({ name:"", dose:"", time:"Mañana", icon:"💊", note:"", days:[0,1,2,3,4,5,6] });
-      const [editId, setEditId] = useState(null);
-      const [toast, setToast] = useState("");
+function renderHistory(){
+  const last7=Array.from({length:7},(_,i)=>{
+    const d=new Date(); d.setDate(d.getDate()-(6-i));
+    const k=d.toISOString().split("T")[0];
+    const di=items.filter(it=>it.days.includes(d.getDay()));
+    const done=di.filter(it=>log[k]?.[it.id]).length;
+    return {k,label:d.toLocaleDateString("es",{weekday:"short"}),done,total:di.length};
+  });
+  const bars=last7.map(({k,label,done,total})=>{
+    const pct=total?done/total:0;
+    const color=pct===1?"#16a34a":pct>0.5?"#6366f1":"#e5e7eb";
+    return `<div class="bar-wrap">
+      <div class="bar-bg"><div class="bar-fill" style="height:${pct*100}%;background:${color}"></div></div>
+      <div class="bar-label">${label}</div>
+      <div class="bar-count">${total?done+'/'+total:'—'}</div>
+    </div>`;
+  }).join('');
 
-      useEffect(() => { localStorage.setItem("supp_items", JSON.stringify(items)); }, [items]);
-      useEffect(() => { localStorage.setItem("supp_log", JSON.stringify(log)); }, [log]);
+  const list=items.length===0
+    ?`<p style="color:#bbb;text-align:center;padding:20px 0">Sin items aún</p>`
+    :items.map(it=>`
+    <div class="list-card">
+      <span style="font-size:22px">${it.icon}</span>
+      <div style="flex:1">
+        <div style="font-weight:600;font-size:14px">${it.name}</div>
+        <div style="font-size:12px;color:#999">${it.dose?it.dose+' · ':''}${it.time}</div>
+      </div>
+      <button class="btn-icon" style="background:#f3f4f6" onclick="event.stopPropagation();startEdit(items.find(x=>x.id==='${it.id}'))">✏️</button>
+      <button class="btn-icon" style="background:#fff0f0" onclick="event.stopPropagation();deleteItem('${it.id}')">🗑️</button>
+    </div>`).join('');
 
-      const showToast = (msg) => { setToast(msg); setTimeout(() => setToast(""), 2000); };
+  return `
+    <p class="section-title">Últimos 7 días</p>
+    <div class="bars">${bars}</div>
+    <p class="section-title">Todos los items (${items.length})</p>
+    ${list}`;
+}
+
+function renderAdd(){
+  const icons=ICONS.map(ic=>`<button class="icon-btn ${form.icon===ic?'selected':''}" onclick="formSet('icon','${ic}')">${ic}</button>`).join('');
+  const times=TIMES.map(t=>`<button class="time-btn ${form.time===t?'selected':''}" onclick="formSet('time','${t}')">${t}</button>`).join('');
+  const days=DAYS.map((d,i)=>`<button class="day-btn ${form.days.includes(i)?'selected':''}" onclick="toggleDay(${i})">${d}</button>`).join('');
+  return `
+    <h3 style="font-size:15px;font-weight:700;color:#1a1a2e;margin-bottom:16px">${editId?'Editar item':'Nuevo suplemento o medicamento'}</h3>
+    <label class="form-label">Ícono</label>
+    <div class="icon-grid">${icons}</div>
+    <label class="form-label">Nombre *</label>
+    <input class="form-input" value="${form.name}" oninput="formSet('name',this.value)" placeholder="ej. Vitamina D, Omega 3..."/>
+    <label class="form-label">Dosis</label>
+    <input class="form-input" value="${form.dose}" oninput="formSet('dose',this.value)" placeholder="ej. 1000mg, 2 cápsulas..."/>
+    <label class="form-label">Horario</label>
+    <div class="time-grid">${times}</div>
+    <label class="form-label">Días</label>
+    <div class="day-grid">${days}</div>
+    <label class="form-label">Nota (opcional)</label>
+    <input class="form-input" value="${form.note}" oninput="formSet('note',this.value)" placeholder="ej. Con mucha agua..." style="margin-bottom:20px"/>
+    <button class="btn-save" style="background:${form.name.trim()?'#6366f1':'#e5e7eb'}" onclick="saveItem()">${editId?'Guardar cambios':'Agregar'}</button>
+    ${editId?`<button class="btn-cancel" onclick="editId=null;form={name:'',dose:'',time:'Mañana',icon:'💊',note:'',days:[0,1,2,3,4,5,6]};setView('today')">Cancelar</button>`:''}`;
+}
+
+function render(){
+  const ti=todayItems(), k=todayStr(), tl=log[k]||{};
+  const done=ti.filter(it=>tl[it.id]).length;
+  const streak=calcStreak();
+  const pct=ti.length?done/ti.length:0;
+  const barColor=done===ti.length&&ti.length?"#16a34a":"#6366f1";
+
+  const progressHTML = ti.length ? `
+    <div style="margin-top:12px">
+      <div style="display:flex;justify-content:space-between;font-size:12px;color:#666;margin-bottom:4px">
+        <span>Progreso de hoy</span>
+        <span style="font-weight:600;color:${done===ti.length?'#16a34a':'#666'}">${done}/${ti.length}</span>
+      </div>
+      <div class="progress-bar-bg"><div class="progress-bar-fill" style="width:${pct*100}%;background:${barColor}"></div></div>
+    </div>` : '';
+
+  document.getElementById("app").innerHTML = `
+    <div class="header">
+      <div class="header-top">
+        <div>
+          <h1 style="font-size:20px;font-weight:700;color:#1a1a2e">Mi Rutina 💊</h1>
+          <p style="font-size:12px;color:#999;margin-top:2px">${new Date().toLocaleDateString("es",{weekday:"long",day:"numeric",month:"long"})}</p>
+        </div>
+        <div class="streak-box">
+          <div class="streak-num">${streak}</div>
+          <div class="streak-label">🔥 racha</div>
+        </div>
+      </div>
+      ${progressHTML}
+      <div class="nav">
+        <button class="${view==='today'?'active':''}" onclick="setView('today')">Hoy</button>
+        <button class="${view==='history'?'active':''}" onclick="setView('history')">Historial</button>
+        <button class="${view==='add'?'active':''}" onclick="setView('add')">${editId?'Editar':'Agregar'}</button>
+      </div>
+    </div>
+    <div class="content">
+      ${view==='today'?renderToday():view==='history'?renderHistory():renderAdd()}
+    </div>
+    <div id="toast" class="toast"></div>`;
+}
+
+load();
+render();
+</script>
+</body>
+</html>
