@@ -128,9 +128,13 @@ function saveItem(){
 function toggleDay(d){
   if(form.days.includes(d)) form.days=form.days.filter(x=>x!==d);
   else form.days.push(d);
-  render();
+  renderForm();
 }
-function formSet(k,v){ form[k]=v; render(); }
+function renderForm(){
+  const el=document.getElementById("form-section");
+  if(el) el.innerHTML=renderAdd();
+}
+function formSet(k,v){ form[k]=v; renderForm(); }
 
 function renderToday(){
   const ti=todayItems(), k=todayStr(), tl=log[k]||{};
@@ -202,15 +206,15 @@ function renderAdd(){
     <label class="form-label">Ícono</label>
     <div class="icon-grid">${icons}</div>
     <label class="form-label">Nombre *</label>
-    <input class="form-input" value="${form.name}" oninput="formSet('name',this.value)" placeholder="ej. Vitamina D, Omega 3..."/>
+    <input class="form-input" id="inp-name" value="${form.name}" oninput="form.name=this.value" placeholder="ej. Vitamina D, Omega 3..."/>
     <label class="form-label">Dosis</label>
-    <input class="form-input" value="${form.dose}" oninput="formSet('dose',this.value)" placeholder="ej. 1000mg, 2 cápsulas..."/>
+    <input class="form-input" id="inp-dose" value="${form.dose}" oninput="form.dose=this.value" placeholder="ej. 1000mg, 2 cápsulas..."/>
     <label class="form-label">Horario</label>
     <div class="time-grid">${times}</div>
     <label class="form-label">Días</label>
     <div class="day-grid">${days}</div>
     <label class="form-label">Nota (opcional)</label>
-    <input class="form-input" value="${form.note}" oninput="formSet('note',this.value)" placeholder="ej. Con mucha agua..." style="margin-bottom:20px"/>
+    <input class="form-input" id="inp-note" value="${form.note}" oninput="form.note=this.value" placeholder="ej. Con mucha agua..." style="margin-bottom:20px"/>
     <button class="btn-save" style="background:${form.name.trim()?'#6366f1':'#e5e7eb'}" onclick="saveItem()">${editId?'Guardar cambios':'Agregar'}</button>
     ${editId?`<button class="btn-cancel" onclick="editId=null;form={name:'',dose:'',time:'Mañana',icon:'💊',note:'',days:[0,1,2,3,4,5,6]};setView('today')">Cancelar</button>`:''}`;
 }
@@ -251,7 +255,7 @@ function render(){
       </div>
     </div>
     <div class="content">
-      ${view==='today'?renderToday():view==='history'?renderHistory():renderAdd()}
+      ${view==='today'?renderToday():view==='history'?renderHistory():`<div id="form-section">${renderAdd()}</div>`}
     </div>
     <div id="toast" class="toast"></div>`;
 }
