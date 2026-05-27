@@ -137,11 +137,20 @@ function toggleDay(d){
   else form.days.push(d);
   renderForm();
 }
+function syncInputs(){
+  const n=document.getElementById("inp-name");
+  const d=document.getElementById("inp-dose");
+  const nt=document.getElementById("inp-note");
+  if(n) form.name=n.value;
+  if(d) form.dose=d.value;
+  if(nt) form.note=nt.value;
+}
 function renderForm(){
+  syncInputs();
   const el=document.getElementById("form-section");
   if(el) el.innerHTML=renderAdd();
 }
-function formSet(k,v){ form[k]=v; renderForm(); }
+function formSet(k,v){ syncInputs(); form[k]=v; renderForm(); }
 
 function renderToday(){
   const ti=todayItems(), k=todayStr(), tl=log[k]||{};
